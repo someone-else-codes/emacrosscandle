@@ -1,0 +1,108 @@
+<html>
+<head>
+<title>EMA Candle Close Trading Strategy</title>
+<script src="main.js"></script>
+</head>
+<body>
+<form name="input" action="#" method="get" onsubmit="clicked_form()">
+<table>
+<tr>
+<td>Asset</td>
+<td><select name="asset">
+<option value="bitcoin" selected="true">Bitcoin</option>
+<option value="ethereum">Ethereum</option>
+<option value="litecoin">Litecoin</option>
+<option value="cardano">Cardano</option>
+</select></td>
+</tr>
+<tr>
+<td>Currency</td>
+<td><select name="currency">
+<option value="btc">btc</option>
+<option value="eth">eth</option>
+<option value="ltc">ltc</option>
+<option value="bch">bch</option>
+<option value="bnb">bnb</option>
+<option value="eos">eos</option>
+<option value="xrp">xrp</option>
+<option value="xlm">xlm</option>
+<option value="link">link</option>
+<option value="dot">dot</option>
+<option value="yfi">yfi</option>
+<option value="usd" selected="true">usd</option>
+<option value="aed">aed</option>
+<option value="ars">ars</option>
+<option value="aud">aud</option>
+<option value="bdt">bdt</option>
+<option value="bhd">bhd</option>
+<option value="bmd">bmd</option>
+<option value="brl">brl</option>
+<option value="cad">cad</option>
+<option value="chf">chf</option>
+<option value="clp">clp</option>
+<option value="cny">cny</option>
+<option value="czk">czk</option>
+<option value="dkk">dkk</option>
+<option value="eur">eur</option>
+<option value="gbp">gbp</option>
+<option value="hkd">hkd</option>
+<option value="huf">huf</option>
+<option value="idr">idr</option>
+<option value="ils">ils</option>
+<option value="inr">inr</option>
+<option value="jpy">jpy</option>
+<option value="krw">krw</option>
+<option value="kwd">kwd</option>
+<option value="lkr">lkr</option>
+<option value="mmk">mmk</option>
+<option value="mxn">mxn</option>
+<option value="myr">myr</option>
+<option value="ngn">ngn</option>
+<option value="nok">nok</option>
+<option value="nzd">nzd</option>
+<option value="php">php</option>
+<option value="pkr">pkr</option>
+<option value="pln">pln</option>
+<option value="rub">rub</option>
+<option value="sar">sar</option>
+<option value="sek">sek</option>
+<option value="sgd">sgd</option>
+<option value="thb">thb</option>
+<option value="try">try</option>
+<option value="twd">twd</option>
+<option value="uah">uah</option>
+<option value="vef">vef</option>
+<option value="vnd">vnd</option>
+<option value="zar">zar</option>
+<option value="xdr">xdr</option>
+<option value="xag">xag</option>
+<option value="xau">xau</option>
+<option value="bits">bits</option>
+<option value="sats">sats</option>
+</select></td>
+</tr>
+<tr>
+<td>EMAs</td>
+<td><input type="text" name="emas" value="8 13 21 55" /></td>
+</tr>
+<tr>
+<td>Timeframe</td>
+<td><input type="text" name="timeframe" value="1" />
+<select name="units">
+<option value="minutes">Minutes</option>
+<option value="hours" selected="true">Hours</option>
+<option value="days">Days</option>
+<option value="weeks">Weeks</option>
+<option value="months">Months</option>
+<option value="years">years</option>
+</select>
+</td>
+</tr>
+</table>
+<hr />
+<input type="submit" />
+<hr />
+<textarea name="output"></textarea>
+</form>
+</body>
+</html>
