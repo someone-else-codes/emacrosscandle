@@ -1,7 +1,13 @@
 
 function show_data(d) {
 	write_output("emas: " + JSON.stringify(d.emas) + "\n");
-	var a = d.prices;
+	var a;
+	a = d.signals;
+	for (var i = 0; i < a.length; ++i) {
+		var p = a[i];
+		write_output(p.date.toISOString() + "\t" + p.price + "\t" + p.signal + "\n");
+	}
+	a = d.prices;
 	for (var i = 0; i < a.length; ++i) {
 		var p = a[i];
 		write_output(p.date.toISOString() + "\t" + p.price + "\n");
@@ -11,6 +17,7 @@ function show_data(d) {
 		}
 		s = s + "\n";
 		write_output(s);
+		write_output("level " + p.level + "\n");
 	}
 }
 
@@ -21,6 +28,63 @@ function process_price(a) {
 	o.timestamp = a[0];
 	o.date = new Date(a[0] + 1000); //convert unix timestamp to javascript date object
 	return o;
+}
+
+function find_signals (d) {
+	// we are longing or shorting on the second close above or below the largest ema where all smaller emas have crossed
+	var t = d.emas.length;
+	var a = new Array();
+	var o = new Array();
+	var level = 0;
+	for (i = 0; i <d.prices.length; ++i) {
+		// is this the second close above or below? we won't know for a while
+		// but it might be
+		if (isNaN(d.prices[i].level)) {return o};
+		if (Math.abs(d.prices[i].level) == t) {
+			a.unshift({
+				price: d.prices[i].price,
+				date: d.prices[i].date,
+				signal: (d.prices[i].level > 0 ? 'buy' : 'sell')
+			});
+		}
+		//we have crossed if we have two buy entries followed by two sell entries or reversed;
+		if (
+			a.length > 3 &&
+			(a[0].signal == a[1].signal) &&
+			(a[2].signal == a[3].signal) &&
+			(a[0].signal != a[2].signal) 
+		) {
+			o.push(a[3]);
+			a = new Array();
+		}
+		
+	}
+	return o;
+}
+
+function find_levels(p, e) {
+	// are all emas and price above or below the largest ema?
+	var l = p["ema-" + e[0]];
+	if (isNaN(l)) {return;} // the largest ema is undefined for the first n values;
+	var n = 0;
+	// count which emas are above and which are below the largest ema
+	for (var i = 1; i < e.length; ++i) {
+		var k = "ema-" + e[i];
+		// increment counter if ema is above (or equal)
+		// decrement if it is below
+		n += ((p[k] < l) ? -1 : 1);
+	}
+	// also compare price to ema
+	n += ((p.price < l) ? -1 : 1);
+	p.level = n;
+
+}
+
+function find_crossings(o) {
+	for (var i = 0; i < o.prices.length; ++i) {
+		find_levels(o.prices[i], o.emas);
+	}
+	o.signals = find_signals(o);
 }
 
 function process_data(o, t) {
@@ -36,6 +100,7 @@ function process_data(o, t) {
 	o.prices = p;
 	calculate_emas(o);
 	o.prices.sort(function (a,b) { return b.date - a.date });
+	find_crossings(o);
 	return o;
 }
 
@@ -58,7 +123,7 @@ function load_data(d) {
 }
 
 function build_data_url (d) {
-	return 'https://api.coingecko.com/api/v3/coins/' + d["asset"] + '/market_chart?vs_currency=' + d["currency"] + '&days=' + d["days"] + '&interval=' + d["interval"];
+	return 'https://api.coingecko.com/api/v3/coins/' + d["asset"] + '/market_chart?vs_currency=' + d["currency"] + '&days=' + d["days"]; //+ '&interval=' + d["interval"];
 }
 
 function string_to_numbers(s) {
@@ -78,6 +143,7 @@ function parse_emas(t) {
 	// because we'll be checking for crossings against the largest ema
 	return a;
 }
+
 function parse_form() {
 	var f = document.forms["input"];
 	var o = {
@@ -85,7 +151,11 @@ function parse_form() {
 		currency: f["currency"].value,
 		interval: f["interval"].value,
 	};
-	o.days = (('daily' == o.interval) ? 330 : 14);
+	o.days = (
+		('daily' == o.interval) ? 'max': 
+		('hourly' == o.interval) ? 90 :
+		1
+	);
 	o.emas = parse_emas(f["emas"].value);
 	return o;
 	
