@@ -32,34 +32,60 @@ function process_price(a) {
 
 function find_signals (d) {
 	// we are longing or shorting on the second close above or below the largest ema where all smaller emas have crossed
+	// to find signals, first we will accumulate runs of levels
 	var t = d.emas.length;
 	var a = new Array();
 	var o = new Array();
-	var level = 0;
-	for (i = 0; i <d.prices.length; ++i) {
-		// is this the second close above or below? we won't know for a while
-		// but it might be
-		if (isNaN(d.prices[i].level)) {return o};
-		if (Math.abs(d.prices[i].level) == t) {
-			a.unshift({
-				price: d.prices[i].price,
-				date: d.prices[i].date,
-				signal: (d.prices[i].level > 0 ? 'buy' : 'sell')
-			});
+	var run = new Array();
+	var runs = new Array();
+	var l = 0;
+	// first put everything we're going to work with in an array;
+	a = d.prices.filter(function (e) { return ! isNaN(e.level)});
+	// now we need to divide the array into runs of values
+	for (i = 0; i < a.length; ++i) {
+		run.push(a[i]);
+		if (a[i].level != l) { 
+			l = a[i].level;
+			if (run.length > 0) {
+				runs.push(run);
+				run = new Array();
+			} 
 		}
-		//we have crossed if we have two buy entries followed by two sell entries or reversed;
-		if (
-			a.length > 3 &&
-			(a[0].signal == a[1].signal) &&
-			(a[2].signal == a[3].signal) &&
-			(a[0].signal != a[2].signal) 
-		) {
-			o.push(a[3]);
-			a = new Array();
-		}
-		
 	}
-	return o;
+	if (run.length > 0) { runs.push(run); }
+	// now we need to filter out all the runs that aren't a max or min
+	// and we just need the second to last element in each array 
+	// because this represents the first candle close inside the run
+	runs = runs.filter(function (e) { return e.length > 1; });
+	a = runs.map(function(e) { return e[e.length - 2]; });
+	a = a.filter(function(e) { return (Math.abs(e.level) == t); });
+	
+	// now we need to filter out runs of the same level again
+	l = 0;
+	runs = new Array();
+	run = new Array();
+
+	for (i = 0; i < a.length; ++i) {
+		run.push(a[i]);
+		if (a[i].level != l) { 
+			l = a[i].level;
+			if (run.length > 0) {
+				runs.push(run);
+				run = new Array();
+			} 
+		}
+	}
+	if (run.length > 0) { runs.push(run); }
+	a = runs.map(function (e) { return e.pop() });
+	//disregard the earliest signal
+	a.pop();
+
+	for (i = 0; i < a.length; ++i) {
+		a[i].signal = (a[i].level) > 0 ? 'buy' : 'sell';
+	}
+
+
+	return a;
 }
 
 function find_levels(p, e) {
