@@ -26,3 +26,10 @@ Here's a short summary of the strategy:
 	A. The 8, 13, and 21 EMA all cross BELOW the 55 EMA
 	B. A candle opens and closes BELOW the 55 EMA after the crossings just described
 
+Here's a link to the live implementation (try it out):
+
+https://someone-else-codes.github.io/emacrosscandle/web-ui/form.html
+
+And here's a link to the source on github:
+
+https://github.com/someone-else-codes/emacrosscandle
